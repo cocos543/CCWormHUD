@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "CCWormView.h"
 
 @interface ViewController ()
 
@@ -16,7 +17,10 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    self.view.backgroundColor = [[UIColor orangeColor] colorWithAlphaComponent:0.4];
+    CCWormView *wormView = [[CCWormView alloc] initWithFrame:CGRectMake(150, 200, 80, 80)];
+//    wormView.backgroundColor = [UIColor grayColor];
+    [self.view addSubview:wormView];
 }
 
 - (void)didReceiveMemoryWarning {
