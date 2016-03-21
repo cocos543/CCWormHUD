@@ -13,7 +13,7 @@
 		ED0D1C381C9A8A76001B8138 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ED0D1C361C9A8A76001B8138 /* Main.storyboard */; };
 		ED0D1C3A1C9A8A76001B8138 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ED0D1C391C9A8A76001B8138 /* Assets.xcassets */; };
 		ED0D1C3D1C9A8A76001B8138 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ED0D1C3B1C9A8A76001B8138 /* LaunchScreen.storyboard */; };
-		ED0D1C461C9A8B6B001B8138 /* CCWormView.m in Sources */ = {isa = PBXBuildFile; fileRef = ED0D1C451C9A8B6B001B8138 /* CCWormView.m */; };
+		EDC7F0071C9FD3EE00AB1EF6 /* CCWormView.m in Sources */ = {isa = PBXBuildFile; fileRef = EDC7F0061C9FD3EE00AB1EF6 /* CCWormView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,8 +27,8 @@
 		ED0D1C391C9A8A76001B8138 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		ED0D1C3C1C9A8A76001B8138 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ED0D1C3E1C9A8A76001B8138 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		ED0D1C441C9A8B6B001B8138 /* CCWormView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCWormView.h; sourceTree = "<group>"; };
-		ED0D1C451C9A8B6B001B8138 /* CCWormView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCWormView.m; sourceTree = "<group>"; };
+		EDC7F0051C9FD3EE00AB1EF6 /* CCWormView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCWormView.h; sourceTree = "<group>"; };
+		EDC7F0061C9FD3EE00AB1EF6 /* CCWormView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCWormView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +45,7 @@
 		ED0D1C211C9A8A76001B8138 = {
 			isa = PBXGroup;
 			children = (
+				EDC7F0041C9FD3EE00AB1EF6 /* Classes */,
 				ED0D1C2C1C9A8A76001B8138 /* CCWormHUD */,
 				ED0D1C2B1C9A8A76001B8138 /* Products */,
 			);
@@ -70,8 +71,6 @@
 				ED0D1C3B1C9A8A76001B8138 /* LaunchScreen.storyboard */,
 				ED0D1C3E1C9A8A76001B8138 /* Info.plist */,
 				ED0D1C2D1C9A8A76001B8138 /* Supporting Files */,
-				ED0D1C441C9A8B6B001B8138 /* CCWormView.h */,
-				ED0D1C451C9A8B6B001B8138 /* CCWormView.m */,
 			);
 			path = CCWormHUD;
 			sourceTree = "<group>";
@@ -82,6 +81,16 @@
 				ED0D1C2E1C9A8A76001B8138 /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		EDC7F0041C9FD3EE00AB1EF6 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				EDC7F0051C9FD3EE00AB1EF6 /* CCWormView.h */,
+				EDC7F0061C9FD3EE00AB1EF6 /* CCWormView.m */,
+			);
+			name = Classes;
+			path = CCWormHUD/Classes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -155,8 +164,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED0D1C351C9A8A76001B8138 /* ViewController.m in Sources */,
-				ED0D1C461C9A8B6B001B8138 /* CCWormView.m in Sources */,
 				ED0D1C321C9A8A76001B8138 /* AppDelegate.m in Sources */,
+				EDC7F0071C9FD3EE00AB1EF6 /* CCWormView.m in Sources */,
 				ED0D1C2F1C9A8A76001B8138 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

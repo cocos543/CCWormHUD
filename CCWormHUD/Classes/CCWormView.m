@@ -3,12 +3,9 @@
 //  CCWormHUD
 //
 //  Created by 郑克明 on 16/3/17.
-//  Copyright © 2016年 郑克明. All rights reserved.
+//  Copyright © 2016年 Cocos. All rights reserved.
 //
 
-/*
- CCWormView对每一个父View都提供唯一的HUD,同一个父View多次调用loding将反复出现同一个HUD.
- */
 #import "CCWormView.h"
 
 //动画半径为HUD尺寸的一半
