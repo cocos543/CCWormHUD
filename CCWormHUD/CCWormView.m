@@ -11,37 +11,116 @@
  */
 #import "CCWormView.h"
 
-#define HUDWith 80
-#define HUDHeight 80
-#define LineWidth 10.0f
+//动画半径为HUD尺寸的一半
+#define HUDWith 40
+#define HUDHeight 40
 
+#define HUDWithLarge 80
+#define HUDHeightLarge 80
+
+#define LineWidth 6.0f
+#define LineWidthLarge 8.0f
+#define WormRunTime 1.2f
+
+#define WORM_ANIMATION_KEY_FIRST @"WORM_ANIMATION_KEY_FIRST"
+#define WORM_ANIMATION_KEY_SECOND @"WORM_ANIMATION_KEY_SECOND"
+#define WORM_ANIMATION_KEY_THIRD @"WORM_ANIMATION_KEY_THIRD"
+
+
+static NSInteger CCWormHUDViewWith = 0;
+static NSInteger CCWormHUDViewHeight = 0;
+static NSInteger CCWormHUDLineWidth = 0;
 @interface CCWormView ()
 @property (nonatomic,strong) CAShapeLayer *firstWormShapeLayer;
 @property (nonatomic,strong) CAShapeLayer *secondWormShapeLayer;
 @property (nonatomic,strong) CAShapeLayer *thirdWormShapeLayer;
+
+@property (nonatomic) CCWormHUDStyle hudStyle;
+/**
+ *  用于显示HUD的视图
+ */
+@property (nonatomic,weak) UIView *presentingView;
+
 @end
 @implementation CCWormView
 
 #pragma mark - 指示器操作
 
-+(instancetype)startLodingWormHUD{
-    return nil;
++(instancetype)wormHUDWithStyle:(CCWormHUDStyle)style toView:(UIView *)toView{
+    
+    CCWormView *view;
+    if (style == CCWormHUDStyleNormal) {
+        CCWormHUDViewWith = HUDWith;
+        CCWormHUDViewHeight = HUDHeight;
+        CCWormHUDLineWidth = LineWidth;
+    }else if (style == CCWormHUDStyleLarge){
+        CCWormHUDViewWith = HUDWithLarge;
+        CCWormHUDViewHeight = HUDHeightLarge;
+        CCWormHUDLineWidth = LineWidthLarge;
+    }
+    
+    CGRect frame = CGRectZero;
+    frame.origin.x = toView.frame.origin.x + ( toView.frame.size.width / 2 - CCWormHUDViewWith / 2);
+    frame.origin.y = toView.frame.origin.y + (toView.frame.size.height / 2 - CCWormHUDViewHeight / 2);
+    frame.size.width = CCWormHUDViewWith;
+    frame.size.height = CCWormHUDViewHeight;
+    
+    view = [[CCWormView alloc] initWithFrame:frame HUDStyle:style];
+    view.presentingView = toView;
+    view.layer.cornerRadius = M_PI * 4;
+    view.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:.8];
+    return view;
 }
 
-+(instancetype)endLodingWormHUD{
-    return nil;
+-(void)startLodingWormHUD{
+    self.isShowing = YES;
+    [self.presentingView addSubview:self];
+    //动起来
+    [self firstWormAnimation];
+    [self secondWormAnimation];
+    [self thirdWormAnimation];
+    
+    self.transform = CGAffineTransformMakeScale(0.1, 0.1);
+    [UIView animateKeyframesWithDuration:0.6 delay:0.0 options:0 animations:^{
+        [UIView addKeyframeWithRelativeStartTime:0 relativeDuration:0.5 animations:^{
+            self.transform = CGAffineTransformMakeScale(1.3, 1.3);
+        }];
+        [UIView addKeyframeWithRelativeStartTime:0.5 relativeDuration:0.5 animations:^{
+            self.transform = CGAffineTransformIdentity;
+        }];
+    } completion: nil];
+}
+
+-(void)endLodingWormHUD{
+    //隐藏指示器,同时移除动画
+    [UIView animateKeyframesWithDuration:0.6 delay:0 options:0 animations:^{
+        [UIView addKeyframeWithRelativeStartTime:0 relativeDuration:0.5 animations:^{
+            self.transform = CGAffineTransformMakeScale(1.2, 1.2);
+        }];
+        [UIView addKeyframeWithRelativeStartTime:0.5 relativeDuration:0.5 animations:^{
+            self.transform = CGAffineTransformMakeScale(0.1, 0.1);
+        }];
+        
+    } completion:^(BOOL finished){
+        self.isShowing = NO;
+        [self.firstWormShapeLayer removeAnimationForKey:WORM_ANIMATION_KEY_FIRST];
+        [self.secondWormShapeLayer removeAnimationForKey:WORM_ANIMATION_KEY_SECOND];
+        [self.thirdWormShapeLayer removeAnimationForKey:WORM_ANIMATION_KEY_THIRD];
+        [self removeFromSuperview];
+    }];
 }
 
 #pragma mark - 初始化
--(instancetype)initWithFrame:(CGRect)frame{
+-(instancetype)initWithFrame:(CGRect)frame HUDStyle:(CCWormHUDStyle)style{
     self = [super initWithFrame:frame];
     if (!self){
         return nil;
     }
+    self.hudStyle = style;
     
     CAShapeLayer *firstWormShapeLayer = [[CAShapeLayer alloc] init];
     firstWormShapeLayer.path = [self wormRunLongPath];
-    firstWormShapeLayer.lineWidth = LineWidth;
+    firstWormShapeLayer.lineWidth = CCWormHUDLineWidth;
     firstWormShapeLayer.lineCap = kCALineCapRound;
     firstWormShapeLayer.strokeColor = [UIColor redColor].CGColor;
     firstWormShapeLayer.fillColor = [UIColor clearColor].CGColor;
@@ -49,7 +128,7 @@
     
     CAShapeLayer *secondWormShapeLayer = [[CAShapeLayer alloc] init];
     secondWormShapeLayer.path = [self wormRunLongPath];
-    secondWormShapeLayer.lineWidth = LineWidth;
+    secondWormShapeLayer.lineWidth = CCWormHUDLineWidth;
     secondWormShapeLayer.lineCap = kCALineCapRound;
     secondWormShapeLayer.lineJoin = kCALineCapRound;
     secondWormShapeLayer.strokeColor = [UIColor yellowColor].CGColor;
@@ -58,7 +137,7 @@
 
     CAShapeLayer *thirdWormShapeLayer = [[CAShapeLayer alloc] init];
     thirdWormShapeLayer.path = [self wormRunLongPath];
-    thirdWormShapeLayer.lineWidth = LineWidth;
+    thirdWormShapeLayer.lineWidth = CCWormHUDLineWidth;
     thirdWormShapeLayer.lineCap = kCALineCapRound;
     thirdWormShapeLayer.lineJoin = kCALineCapRound;
     thirdWormShapeLayer.strokeColor = [UIColor greenColor].CGColor;
@@ -71,42 +150,38 @@
     self.firstWormShapeLayer = firstWormShapeLayer;
     self.secondWormShapeLayer = secondWormShapeLayer;
     self.thirdWormShapeLayer = thirdWormShapeLayer;
-    
-    [self firstWormAnimation];
-    [self secondWormAnimation];
-    [self thirdWormAnimation];
-    
-    
+
     return self;
 }
 
--(CGPathRef)wormRunPath{
-    //画一个半圆
-    return [self wormRunPathWithStartCut:0 endCut:0];
-}
-
--(CGPathRef)wormRunPathWithStartCut:(CGFloat)startCut endCut:(CGFloat)endCut{
-    //画一个半圆
-    UIBezierPath *wormPath = [UIBezierPath bezierPathWithArcCenter:CGPointMake(HUDWith / 2.0, HUDHeight / 2.0) radius:HUDWith / 2.0 - 5 startAngle:M_PI - startCut endAngle:2 * M_PI - endCut clockwise:YES];
-    CGPathRef path = wormPath.CGPath;
-    return path;
-}
-
 -(CGPathRef)wormRunLongPath{
-    //画两个连着的半圆
-    CGFloat radius = HUDWith / 2.0 - 5;
-    UIBezierPath *wormPath = [UIBezierPath bezierPathWithArcCenter:CGPointMake(HUDWith / 2.0, HUDHeight / 2.0) radius:radius startAngle:M_PI endAngle:2 * M_PI clockwise:YES];
-    [wormPath addArcWithCenter:CGPointMake(radius * 2 + HUDWith / 2.0, HUDHeight / 2.0) radius:radius startAngle:M_PI endAngle:2 * M_PI clockwise:YES];
+    //确定路径起点位置
+    CGPoint center;
+    if (self.hudStyle == CCWormHUDStyleLarge || self.hudStyle==CCWormHUDStyleNormal) {
+        center = CGPointMake(self.frame.size.width * 9 / 10, self.frame.size.height / 2);
+    }
+    
+    //两个连着的半圆
+    CGFloat radius = (CCWormHUDViewWith / 2.0) / 2.0;
+    UIBezierPath *wormPath = [UIBezierPath bezierPathWithArcCenter:center radius:radius startAngle:M_PI endAngle:2 * M_PI clockwise:YES];
+    [wormPath addArcWithCenter:CGPointMake(center.x  + radius * 2, center.y) radius:radius startAngle:M_PI endAngle:2 * M_PI clockwise:YES];
     
     CGPathRef path = wormPath.CGPath;
     return path;
+
 }
 
 -(CGPathRef)wormRunLongPathWithStartCut:(CGFloat)startCut endCut:(CGFloat)endCut{
-    //画两个连着的半圆
-    CGFloat radius = HUDWith / 2.0 - 5;
-    UIBezierPath *wormPath = [UIBezierPath bezierPathWithArcCenter:CGPointMake(HUDWith / 2.0, HUDHeight / 2.0) radius:radius startAngle:M_PI endAngle:2 * M_PI clockwise:YES];
-    [wormPath addArcWithCenter:CGPointMake(radius * 2 + HUDWith / 2.0, HUDHeight / 2.0) radius:radius startAngle:M_PI endAngle:2 * M_PI - endCut clockwise:YES];
+    //确定路径起点位置
+    CGPoint center;
+    if (self.hudStyle == CCWormHUDStyleLarge || self.hudStyle==CCWormHUDStyleNormal) {
+        center = CGPointMake(self.frame.size.width * 9 / 10, self.frame.size.height / 2);
+    }
+    
+    //两个连着的半圆
+    CGFloat radius = (CCWormHUDViewWith / 2.0) / 2.0;
+    UIBezierPath *wormPath = [UIBezierPath bezierPathWithArcCenter:center radius:radius startAngle:M_PI + startCut endAngle:2 * M_PI clockwise:YES];
+    [wormPath addArcWithCenter:CGPointMake(center.x  + radius * 2, center.y) radius:radius startAngle:M_PI endAngle:2 * M_PI - endCut clockwise:YES];
     
     CGPathRef path = wormPath.CGPath;
     return path;
@@ -116,125 +191,83 @@
  *  第三条虫子嚅动
  */
 -(void)thirdWormAnimation{
-    //虫子拉伸
-    CABasicAnimation *strokeEndAm = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
-    strokeEndAm.toValue = [NSNumber numberWithFloat:0.5];
-    //fromValue 开始画时已经存在的部分的量
-    strokeEndAm.fromValue = [NSNumber numberWithFloat:0.010];
-    strokeEndAm.duration = 0.75;
-    strokeEndAm.timingFunction = [CAMediaTimingFunction functionWithControlPoints:0.42 :0.0 :1.0 :0.55];
-    strokeEndAm.fillMode = kCAFillModeForwards;
     
-    //虫子缩小
-    CABasicAnimation *strokeStartAm = [CABasicAnimation animationWithKeyPath:@"strokeStart"];
-    strokeStartAm.toValue = [NSNumber numberWithFloat:0.490 ];
-    strokeStartAm.fromValue = [NSNumber numberWithFloat:0];
-    strokeStartAm.duration = 0.90;
-    //如果不被Group加入的话,CACurrentMediaTime() + 1 才表示延迟1秒.
-    strokeStartAm.beginTime = 0.25;//延迟一秒执行
-    strokeStartAm.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    strokeStartAm.fillMode = kCAFillModeForwards;
+    CAAnimationGroup *animationGroup = [self baseWormAnimationWithEnd1From:0.010 end1To:0.5 end1Duration:0.75 start1From:0 start1To:0.490 start1Duration:0.9 start1Begin:0.25 end2From:0.5 end2To:0.5 + 0.5 end2Duration:0.75 end2Begin:WormRunTime + 0.15 + 0.20 start2From:0.5 start2To:0.5 + 0.5 start2Duration:0.30 start2Begin:0.15 + 0.75 + WormRunTime];
     
-    
-    //虫子拉伸2 拉伸的第二阶段,必须让上一层的第二阶段先动
-    CABasicAnimation *strokeEndAm2 = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
-    strokeEndAm2.toValue = [NSNumber numberWithFloat:0.5 + 0.5];
-    //fromValue 开始画时已经存在的部分的量
-    strokeEndAm2.fromValue = [NSNumber numberWithFloat:0.5];
-    strokeEndAm2.duration = 0.75;
-    strokeEndAm2.beginTime = 1.2 + 0.15 + 0.20;
-    strokeEndAm2.timingFunction = [CAMediaTimingFunction functionWithControlPoints:0.42 :0.0 :1.0 :0.55];
-    strokeEndAm2.fillMode = kCAFillModeForwards;
-    
-    //虫子缩小2
-    CABasicAnimation *strokeStartAm2 = [CABasicAnimation animationWithKeyPath:@"strokeStart"];
-    strokeStartAm2.toValue = [NSNumber numberWithFloat:0.5 + 0.5];
-    strokeStartAm2.fromValue = [NSNumber numberWithFloat:0.5 + 0];
-    strokeStartAm2.duration = 0.30;
-    //如果不被Group加入的话,CACurrentMediaTime() + 1 才表示延迟1秒.
-    strokeStartAm2.beginTime =0.15 + 0.75 + 1.2;//延迟一秒执行
-    strokeStartAm2.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    
-    
-    //平移动画
-    CABasicAnimation *xTranslationAm = [CABasicAnimation animationWithKeyPath:@"transform.translation.x"];
-    xTranslationAm.toValue = [NSNumber numberWithFloat: (HUDWith / -1.0 + 10)];
-    xTranslationAm.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-    xTranslationAm.duration = 1.18;
-    xTranslationAm.fillMode = kCAFillModeForwards;
-    
-    CABasicAnimation *xTranslationAm2 = [CABasicAnimation animationWithKeyPath:@"transform.translation.x"];
-    xTranslationAm2.toValue = [NSNumber numberWithFloat: (HUDWith / -1.0 + 10) * 2];
-    xTranslationAm2.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-    xTranslationAm2.duration = 1.18;
-    xTranslationAm2.beginTime = 1.20;
-    xTranslationAm2.fillMode = kCAFillModeForwards;
-    
-    
-    
-    CAAnimationGroup *animationGroup = [CAAnimationGroup animation];
-    animationGroup.animations = [NSArray arrayWithObjects: strokeStartAm, strokeEndAm, xTranslationAm, strokeEndAm2, strokeStartAm2, xTranslationAm2, nil];
-    animationGroup.repeatCount = HUGE_VALF;
-    //动画总时间应该以组中动画时间最长为标准
-    animationGroup.duration = 1.2 * 2;
-    [self.thirdWormShapeLayer addAnimation:animationGroup forKey:nil];
+    [self.thirdWormShapeLayer addAnimation:animationGroup forKey:WORM_ANIMATION_KEY_THIRD];
 }
-
-
 
 /**
  *  第二条虫子嚅动
  */
 -(void)secondWormAnimation{
-    //虫子拉伸
+    
+    CAAnimationGroup *animationGroup = [self baseWormAnimationWithEnd1From:0.010 end1To:0.5 end1Duration:0.75 start1From:0 start1To:0.490 start1Duration:0.70 start1Begin:0.50 end2From:0.5 end2To:0.5 + 0.5 end2Duration:0.75 end2Begin:WormRunTime + 0.15 start2From:0.5 start2To:0.5 + 0.5 start2Duration:0.30 start2Begin:0.15 + 0.75 + WormRunTime];
+    
+    [self.secondWormShapeLayer addAnimation:animationGroup forKey:WORM_ANIMATION_KEY_SECOND];
+}
+
+/**
+ *  第一条虫子嚅动 (最底部的那条)
+ */
+-(void)firstWormAnimation{
+    CAAnimationGroup *animationGroup = [self baseWormAnimationWithEnd1From:0 end1To:0.5 end1Duration:0.75 start1From:0 start1To:0.5 start1Duration:0.45 start1Begin:0.75 end2From:0.5 end2To:0.5 + 0.5 end2Duration:0.75 end2Begin:1.2 start2From:0.5 start2To:0.5 + 0.5 start2Duration:0.45 start2Begin:0.75 + WormRunTime];
+    
+    [self.firstWormShapeLayer addAnimation:animationGroup forKey:WORM_ANIMATION_KEY_FIRST];
+}
+
+-(CAAnimationGroup *)baseWormAnimationWithEnd1From:(CGFloat)end1FromValue end1To:(CGFloat)end1ToValue end1Duration:(CGFloat)end1Duration start1From:(CGFloat)start1FromValue start1To:(CGFloat)start1ToValue start1Duration:(CGFloat)start1Duration start1Begin:(CGFloat)start1BeginTime end2From:(CGFloat)end2FromValue end2To:(CGFloat)end2ToValue end2Duration:(CGFloat)end2Duration end2Begin:(CGFloat)end2BeginTime start2From:(CGFloat)start2FromValue start2To:(CGFloat)start2ToValue start2Duration:(CGFloat)start2Duration start2Begin:(CGFloat)start2BeginTime{
+    
+    
+    //虫子拉伸1
     CABasicAnimation *strokeEndAm = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
-    strokeEndAm.toValue = [NSNumber numberWithFloat:0.5];
+    strokeEndAm.toValue = [NSNumber numberWithFloat:end1ToValue];
     //fromValue 开始画时已经存在的部分的量
-    strokeEndAm.fromValue = [NSNumber numberWithFloat:0.010];
-    strokeEndAm.duration = 0.75;
+    strokeEndAm.fromValue = [NSNumber numberWithFloat:end1FromValue];
+    strokeEndAm.duration = end1Duration;
     strokeEndAm.timingFunction = [CAMediaTimingFunction functionWithControlPoints:0.42 :0.0 :1.0 :0.55];
     strokeEndAm.fillMode = kCAFillModeForwards;
     
-    //虫子缩小
+    //虫子缩小1
     CABasicAnimation *strokeStartAm = [CABasicAnimation animationWithKeyPath:@"strokeStart"];
-    strokeStartAm.toValue = [NSNumber numberWithFloat:0.490];
-    strokeStartAm.fromValue = [NSNumber numberWithFloat:0];
-    strokeStartAm.duration = 0.70;
+    strokeStartAm.toValue = [NSNumber numberWithFloat:start1ToValue];
+    strokeStartAm.fromValue = [NSNumber numberWithFloat:start1FromValue];
+    strokeStartAm.duration = start1Duration;
     //如果不被Group加入的话,CACurrentMediaTime() + 1 才表示延迟1秒.
-    strokeStartAm.beginTime = 0.50;//延迟一秒执行
+    strokeStartAm.beginTime = start1BeginTime;//延迟执行
     strokeStartAm.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
     strokeStartAm.fillMode = kCAFillModeForwards;
     
     
     //虫子拉伸2 拉伸的第二阶段,必须让上一层的第二阶段先动
     CABasicAnimation *strokeEndAm2 = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
-    strokeEndAm2.toValue = [NSNumber numberWithFloat:0.5 + 0.5];
+    strokeEndAm2.toValue = [NSNumber numberWithFloat:end2ToValue];
     //fromValue 开始画时已经存在的部分的量
-    strokeEndAm2.fromValue = [NSNumber numberWithFloat:0.5];
-    strokeEndAm2.duration = 0.75;
-    strokeEndAm2.beginTime = 1.2 + 0.15;
+    strokeEndAm2.fromValue = [NSNumber numberWithFloat:end2FromValue];
+    strokeEndAm2.duration = end2Duration;
+    strokeEndAm2.beginTime = end2BeginTime;
     strokeEndAm2.timingFunction = [CAMediaTimingFunction functionWithControlPoints:0.42 :0.0 :1.0 :0.55];
     strokeEndAm2.fillMode = kCAFillModeForwards;
     
     //虫子缩小2
     CABasicAnimation *strokeStartAm2 = [CABasicAnimation animationWithKeyPath:@"strokeStart"];
-    strokeStartAm2.toValue = [NSNumber numberWithFloat:0.5 + 0.5];
-    strokeStartAm2.fromValue = [NSNumber numberWithFloat:0.5 + 0];
-    strokeStartAm2.duration = 0.30;
+    strokeStartAm2.toValue = [NSNumber numberWithFloat:start2ToValue];
+    strokeStartAm2.fromValue = [NSNumber numberWithFloat:start2FromValue];
+    strokeStartAm2.duration = start2Duration;
     //如果不被Group加入的话,CACurrentMediaTime() + 1 才表示延迟1秒.
-    strokeStartAm2.beginTime =0.15 + 0.75 + 1.2;//延迟一秒执行
+    strokeStartAm2.beginTime = start2BeginTime;//延迟一秒执行
     strokeStartAm2.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
     
     
     //平移动画
     CABasicAnimation *xTranslationAm = [CABasicAnimation animationWithKeyPath:@"transform.translation.x"];
-    xTranslationAm.toValue = [NSNumber numberWithFloat: (HUDWith / -1.0 + 10)];
+    xTranslationAm.toValue = [NSNumber numberWithFloat: ( (CCWormHUDViewWith / 2.0) / -1.0)];
     xTranslationAm.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
     xTranslationAm.duration = 1.18;
     xTranslationAm.fillMode = kCAFillModeForwards;
     
     CABasicAnimation *xTranslationAm2 = [CABasicAnimation animationWithKeyPath:@"transform.translation.x"];
-    xTranslationAm2.toValue = [NSNumber numberWithFloat: (HUDWith / -1.0 + 10) * 2];
+    xTranslationAm2.toValue = [NSNumber numberWithFloat: ( (CCWormHUDViewWith / 2.0) / -1.0) * 2];
     xTranslationAm2.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
     xTranslationAm2.duration = 1.18;
     xTranslationAm2.beginTime = 1.20;
@@ -246,77 +279,9 @@
     animationGroup.animations = [NSArray arrayWithObjects: strokeStartAm, strokeEndAm, xTranslationAm, strokeEndAm2, strokeStartAm2, xTranslationAm2, nil];
     animationGroup.repeatCount = HUGE_VALF;
     //动画总时间应该以组中动画时间最长为标准
-    animationGroup.duration = 1.2 * 2;
-    [self.secondWormShapeLayer addAnimation:animationGroup forKey:nil];
-}
-
-
-/**
- *  第一条虫子嚅动 (最底部的那条)
- */
--(void)firstWormAnimation{
-    //虫子拉伸
-    CABasicAnimation *strokeEndAm = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
-    strokeEndAm.toValue = [NSNumber numberWithFloat:0.5];
-    //fromValue 开始画时已经存在的部分的量
-    strokeEndAm.fromValue = [NSNumber numberWithFloat:0];
-    strokeEndAm.duration = 0.75;
-    strokeEndAm.timingFunction = [CAMediaTimingFunction functionWithControlPoints:0.42 :0.0 :1.0 :0.55];
-    strokeEndAm.fillMode = kCAFillModeForwards;
+    animationGroup.duration = WormRunTime * 2;
     
-    //虫子缩小
-    CABasicAnimation *strokeStartAm = [CABasicAnimation animationWithKeyPath:@"strokeStart"];
-    strokeStartAm.toValue = [NSNumber numberWithFloat:0.5];
-    strokeStartAm.fromValue = [NSNumber numberWithFloat:0];
-    strokeStartAm.duration = 0.45;
-    //如果不被Group加入的话,CACurrentMediaTime() + 1 才表示延迟1秒.
-    strokeStartAm.beginTime = 0.75;//延迟一秒执行
-    strokeStartAm.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    strokeStartAm.fillMode = kCAFillModeForwards;
-    
-    
-    //虫子拉伸2
-    CABasicAnimation *strokeEndAm2 = [CABasicAnimation animationWithKeyPath:@"strokeEnd"];
-    strokeEndAm2.toValue = [NSNumber numberWithFloat:0.5 + 0.5];
-    //fromValue 开始画时已经存在的部分的量
-    strokeEndAm2.fromValue = [NSNumber numberWithFloat:0.5 + 0];
-    strokeEndAm2.duration = 0.75;
-    strokeEndAm2.beginTime = 1.2;
-    strokeEndAm2.timingFunction = [CAMediaTimingFunction functionWithControlPoints:0.42 :0.0 :1.0 :0.55];
-    strokeEndAm2.fillMode = kCAFillModeForwards;
-    
-    //虫子缩小2
-    CABasicAnimation *strokeStartAm2 = [CABasicAnimation animationWithKeyPath:@"strokeStart"];
-    strokeStartAm2.toValue = [NSNumber numberWithFloat:0.5 + 0.5];
-    strokeStartAm2.fromValue = [NSNumber numberWithFloat:0.5 + 0];
-    strokeStartAm2.duration = 0.45;
-    //如果不被Group加入的话,CACurrentMediaTime() + 1 才表示延迟1秒.
-    strokeStartAm2.beginTime = 0.75 + 1.2;//延迟一秒执行
-    strokeStartAm2.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    
-    
-    //平移动画
-    CABasicAnimation *xTranslationAm = [CABasicAnimation animationWithKeyPath:@"transform.translation.x"];
-    xTranslationAm.toValue = [NSNumber numberWithFloat: (HUDWith / -1.0 + 10)];
-    xTranslationAm.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-    xTranslationAm.duration = 1.18;
-    xTranslationAm.fillMode = kCAFillModeForwards;
-    
-    CABasicAnimation *xTranslationAm2 = [CABasicAnimation animationWithKeyPath:@"transform.translation.x"];
-    xTranslationAm2.toValue = [NSNumber numberWithFloat: (HUDWith / -1.0 + 10) * 2];
-    xTranslationAm2.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut];
-    xTranslationAm2.duration = 1.18;
-    xTranslationAm2.beginTime = 1.20;
-    xTranslationAm2.fillMode = kCAFillModeForwards;
-    
-    
-    
-    CAAnimationGroup *animationGroup = [CAAnimationGroup animation];
-    animationGroup.animations = [NSArray arrayWithObjects: strokeStartAm, strokeEndAm, xTranslationAm, strokeEndAm2, strokeStartAm2, xTranslationAm2, nil];
-    animationGroup.repeatCount = HUGE_VALF;
-    //动画总时间应该以组中动画时间最长为标准
-    animationGroup.duration = 1.2 * 2;
-    [self.firstWormShapeLayer addAnimation:animationGroup forKey:nil];
+    return animationGroup;
 }
 
 

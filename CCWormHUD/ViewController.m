@@ -10,22 +10,27 @@
 #import "CCWormView.h"
 
 @interface ViewController ()
-
+@property (nonatomic,strong) CCWormView *ccView;
 @end
 
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.view.backgroundColor = [[UIColor orangeColor] colorWithAlphaComponent:0.4];
-    CCWormView *wormView = [[CCWormView alloc] initWithFrame:CGRectMake(150, 200, 80, 80)];
-//    wormView.backgroundColor = [UIColor grayColor];
-    [self.view addSubview:wormView];
+    CCWormView *wormView = [CCWormView wormHUDWithStyle:CCWormHUDStyleLarge toView:self.view];
+    self.ccView = wormView;
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+}
+
+- (IBAction)showOrHide:(id)sender {
+    if (self.ccView.isShowing == NO) {
+        [self.ccView startLodingWormHUD];
+    }else{
+        [self.ccView endLodingWormHUD];
+    }
 }
 
 @end
