@@ -1,0 +1,36 @@
+//
+//  ViewController.m
+//  CCWormHUDDemo
+//
+//  Created by 郑克明 on 16/3/21.
+//  Copyright © 2016年 Cocos. All rights reserved.
+//
+
+#import "ViewController.h"
+#import "CCWormView.h"
+
+@interface ViewController ()
+@property (nonatomic,strong) CCWormView *ccView;
+@end
+
+@implementation ViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    CCWormView *wormView = [CCWormView wormHUDWithStyle:CCWormHUDStyleLarge toView:self.view];
+    self.ccView = wormView;
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+}
+
+- (IBAction)showOrHide:(id)sender {
+    if (self.ccView.isShowing == NO) {
+        [self.ccView startLodingWormHUD];
+    }else{
+        [self.ccView endLodingWormHUD];
+    }
+}
+
+@end
