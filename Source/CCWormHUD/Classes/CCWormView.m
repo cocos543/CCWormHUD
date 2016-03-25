@@ -119,6 +119,7 @@ static NSInteger CCWormHUDLineWidth = 0;
     firstWormShapeLayer.path = [self wormRunLongPath];
     firstWormShapeLayer.lineWidth = CCWormHUDLineWidth;
     firstWormShapeLayer.lineCap = kCALineCapRound;
+    firstWormShapeLayer.lineJoin = kCALineCapRound;
     firstWormShapeLayer.strokeColor = [UIColor redColor].CGColor;
     firstWormShapeLayer.fillColor = [UIColor clearColor].CGColor;
     firstWormShapeLayer.actions = [[NSDictionary alloc] initWithObjectsAndKeys:[NSNull null],@"strokeStart",[NSNull null],@"strokeEnd", nil];
@@ -143,7 +144,7 @@ static NSInteger CCWormHUDLineWidth = 0;
     
     [self.layer addSublayer:firstWormShapeLayer];
     [self.layer addSublayer:secondWormShapeLayer];
-    [self.layer addSublayer:thirdWormShapeLayer];	
+    [self.layer addSublayer:thirdWormShapeLayer];
     self.firstWormShapeLayer = firstWormShapeLayer;
     self.secondWormShapeLayer = secondWormShapeLayer;
     self.thirdWormShapeLayer = thirdWormShapeLayer;
