@@ -2,8 +2,8 @@
 一个指示器,仿照虫子运动的方式执行动画.
 
 **参照原型**
-![image](三色虫.gif)
+![image](a-diligent-worm.gif)
 
 **实现效果**
 
-![image](wormRun.gif)
+![image](a-diligent-worm-in-iOS.gif)
